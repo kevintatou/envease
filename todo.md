@@ -1,0 +1,3 @@
+- Make placeholder markers dynamic
+- Ignore gitignored files
+- Create plugin vscode/Rider
