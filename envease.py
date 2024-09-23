@@ -33,6 +33,9 @@ def replace_in_file(file_path, reverse=False):
 # Function to process files and directories
 def process_directory(directory, reverse=False):
     for root, dirs, files in os.walk(directory, topdown=False):
+        # Skip .idea directory
+        dirs[:] = [d for d in dirs if d != '.idea']
+        
         # Process files
         for file_name in files:
             file_path = os.path.join(root, file_name)
@@ -45,7 +48,7 @@ def process_directory(directory, reverse=False):
                     new_name = new_name.replace(placeholder, value)
             if new_name != file_name:
                 os.rename(file_path, os.path.join(root, new_name))
-
+        
         # Process directories
         for dir_name in dirs:
             dir_path = os.path.join(root, dir_name)
@@ -56,13 +59,16 @@ def process_directory(directory, reverse=False):
                 else:
                     new_name = new_name.replace(placeholder, value)
             if new_name != dir_name:
-                os.rename(dir_path, os.path.join(root, new_name))
+                try:
+                    os.rename(dir_path, os.path.join(root, new_name))
+                except OSError as e:
+                    print(f"Skipping non-empty directory: {dir_path}")
 
-# Parse command-line arguments
-parser = argparse.ArgumentParser(description='Replace or revert placeholders in files and directories.')
-parser.add_argument('directory', help='The directory to process')
-parser.add_argument('--reverse', action='store_true', help='Revert the placeholders')
+# Argument parsing
+parser = argparse.ArgumentParser(description='Process some files.')
+parser.add_argument('directory', type=str, help='Directory to process')
+parser.add_argument('--reverse', action='store_true', help='Reverse the replacement')
 args = parser.parse_args()
 
-# Process the specified directory
+# Process the directory
 process_directory(args.directory, args.reverse)
